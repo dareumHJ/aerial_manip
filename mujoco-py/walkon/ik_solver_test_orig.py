@@ -17,8 +17,8 @@ frames = []
 mujoco.mj_resetData(model, data)
 
 #Init position.
-# pi = np.pi
-# data.qpos = [3*pi/2, -pi/2, pi/2, 3*pi/2, 3*pi/2, 0] #ENABLE if you want test circle
+pi = np.pi
+data.qpos = [3*pi/2, -pi/2, pi/2, 3*pi/2, 3*pi/2, 0] #ENABLE if you want test circle
 
 #Init parameters
 jacp = np.zeros((3, model.nv)) #translation jacobian
@@ -54,7 +54,7 @@ def circle(t: float, r: float, h: float, k: float, f: float) -> np.ndarray:
 with mujoco.viewer.launch_passive(model, data) as viewer:
     while data.time < DURATION:
         
-        # goal = circle(data.time, 0.1, 0.5, 0.0, 0.5) #ENABLE to test circle.
+        goal = circle(data.time, 0.1, 0.5, 0.0, 0.5) #ENABLE to test circle.
         
         if (np.linalg.norm(error) >= tol):
             #Calculate jacobian

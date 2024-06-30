@@ -33,67 +33,57 @@
         <geom name="floor" pos="0 0 0" size="0 0 .25" type="plane" material="matplane" condim="3"/>
         <light name="light" pos="0 5 5"/>
 
-        <body name="L_FOOT" pos="0 0 1.2" euler="0 0 0">
-            <joint name="JOINT_LA_PLA" pos="0 0 0" axis="0 1 0" range="-30 115"/>
-            <geom type="mesh" mesh="L_FOOT"/>
-            <inertial mass="7.55104" pos="0.04099 0.27747 0.01767"/>
-            <!-- <body name="L_ANKLE" pos="-0.04227 0.11025 0.38744" euler="0 -45 0">
-                <joint name="JOINT_LA_INV" axis="1 0 0" range="-30 30"/>
-                <geom type="mesh" mesh="L_ANKLE"/>
-                <inertial mass="0.55947" pos="-0.01557 0.27552 -0.01969"/>
-                <body name="L_SHANK" pos=".009 .025 .43062">
-                    <joint name="JOINT_LK_EXT" axis="0 1 0" range="5 125" damping="3"/>
-                    <geom type="mesh" mesh="L_SHANK"/>
-                    <inertial mass="2.49032" pos="-0.01306 0.29591 -0.01005"/>
-                    <body name="L_THIGH" pos="0 -.00175 .15415">
-                        <joint name="JOINT_LH_EXT" axis="0 1 0" range="-115 30" damping="3.25"/>
+
+        <body name="BASE" pos="0 0 1.2">
+            <freejoint/>
+            <geom type="mesh" mesh="BASE" pos="0 0 0"/>
+            <inertial mass="4.06288" pos="0.08148 0.14026 0.0055"/>
+            
+            <body name="L_BASE" pos="0 .105 0">
+                <!-- <joint name="JOINT_LH_ABD" pos="0 0 0" axis="1 0 0" range="-10 15"/> -->
+                <joint name="JOINT_LH_ABD" pos="0 0 0" axis="1 0 0" range="0 0.01"/>
+                <geom type="mesh" mesh="L_BASE"/>
+                <inertial mass="4.90278" pos="0.02442 0.38146 -0.0482"/>
+                <body name="L_HIP" pos="-.2125 .155 -.04085">
+                    <joint name="JOINT_LH_ROT" pos="0 0 0" axis="0 0 1" range="0 0.01" damping="5.65"/>
+                    <!-- <joint name="JOINT_LH_ROT" pos="0 0 0" axis="0 0 1" range="-15 15" damping="5.65"/> -->
+                    <geom type="mesh" mesh="L_HIP"/>
+                    <inertial mass="4.36022" pos="-0.12588 0.41316 -0.20155"/>
+                    <body name="L_THIGH" pos="0 .00175 -.15415">
+                        <!-- <joint name="JOINT_LH_EXT" axis="0 1 0" range="-115 30" damping="3.25"/> -->
+                        <joint name="JOINT_LH_EXT" axis="0 1 0" range="0 0.01" damping="3.25"/>
                         <geom type="mesh" mesh="L_THIGH"/>
                         <inertial mass="2.70534" pos="-0.13199 0.4022 -0.2723"/>
-                    </body>
-                </body>
-            </body> -->
-        </body>
-
-        <!-- LEFT LIMB -->
-        <!-- <body name="L_BASE" pos="0 .105 1.2">
-            <joint name="JOINT_LH_ABD" pos="0 0 0" axis="1 0 0" range="-10 15"/>
-            <geom type="mesh" mesh="L_BASE"/>
-            <inertial mass="4.90278" pos="0.02442 0.38146 -0.0482"/>
-            <body name="L_HIP" pos="-.2125 .155 -.04085">
-                <joint name="JOINT_LH_ROT" pos="0 0 0" axis="0 0 1" range="-15 15" damping="5.65"/>
-                <geom type="mesh" mesh="L_HIP"/>
-                <inertial mass="4.36022" pos="-0.12588 0.41316 -0.20155"/>
-                <body name="L_THIGH" pos="0 .00175 -.15415">
-                    <joint name="JOINT_LH_EXT" axis="0 1 0" range="-115 30" damping="3.25"/>
-                    <geom type="mesh" mesh="L_THIGH"/>
-                    <inertial mass="2.70534" pos="-0.13199 0.4022 -0.2723"/>
-                    <body name="L_SHANK" pos="-.009 -.025 -.43062">
-                        <joint name="JOINT_LK_EXT" axis="0 1 0" range="5 125" damping="3"/>
-                        <geom type="mesh" mesh="L_SHANK"/>
-                        <inertial mass="2.49032" pos="-0.01306 0.29591 -0.01005"/>
-                        <body name="L_ANKLE" pos="0.04227 -0.11025 -0.38744" euler="0 -45 0">
-                            <joint name="JOINT_LA_INV" axis="1 0 0" range="-30 30"/>
-                            <geom type="mesh" mesh="L_ANKLE"/>
-                            <inertial mass="0.55947" pos="-0.01557 0.27552 -0.01969"/>
-                            <body name="L_FOOT" pos="0 0 0" euler="0 45 0">
-                                <joint name="JOINT_LA_PLA" pos="0 0 0" axis="0 1 0" range="-30 115"/>
-                                <geom type="mesh" mesh="L_FOOT"/>
-                                <inertial mass="7.55104" pos="0.04099 0.27747 0.01767"/>
+                        <body name="L_SHANK" pos="-.009 -.025 -.43062">
+                            <!-- <joint name="JOINT_LK_EXT" axis="0 1 0" range="5 125" damping="3"/> -->
+                            <joint name="JOINT_LK_EXT" axis="0 1 0" range="0 0.01" damping="3"/>
+                            <geom type="mesh" mesh="L_SHANK"/>
+                            <inertial mass="2.49032" pos="-0.01306 0.29591 -0.01005"/>
+                            <body name="L_ANKLE" pos="0.04227 -0.11025 -0.38744" euler="0 -45 0">
+                                <!-- <joint name="JOINT_LA_INV" axis="1 0 0" range="-30 30"/> -->
+                                <joint name="JOINT_LA_INV" axis="1 0 0" range="0 0.01"/>
+                                <geom type="mesh" mesh="L_ANKLE"/>
+                                <inertial mass="0.55947" pos="-0.01557 0.27552 -0.01969"/>
+                                <body name="L_FOOT" pos="0 0 0" euler="0 45 0">
+                                    <joint name="JOINT_LA_PLA" pos="0 0 0" axis="0 1 0" range="-30 115"/>
+                                    <geom type="mesh" mesh="L_FOOT"/>
+                                    <inertial mass="7.55104" pos="0.04099 0.27747 0.01767"/>
+                                </body>
                             </body>
                         </body>
                     </body>
                 </body>
             </body>
-        </body> -->
+        </body>
     </worldbody>
 
     <actuator>
         <!-- LEFT LIMB ACTUATORS -->
-        <!-- <general name="ACT_L_HIP_ABD" joint="JOINT_LH_ABD" gear="1" ctrllimited="true" ctrlrange="-250 250"/>
-        <general name="ACT_L_HIP_ROT" joint="JOINT_LH_ROT" gear="1" ctrllimited="true" ctrlrange="-135 135"/> -->
-        <!-- <general name="ACT_L_HIP_EXT" joint="JOINT_LH_EXT" gear="1" ctrllimited="true" ctrlrange="-200 200"/>
+        <general name="ACT_L_HIP_ABD" joint="JOINT_LH_ABD" gear="1" ctrllimited="true" ctrlrange="-250 250"/>
+        <general name="ACT_L_HIP_ROT" joint="JOINT_LH_ROT" gear="1" ctrllimited="true" ctrlrange="-135 135"/>
+        <general name="ACT_L_HIP_EXT" joint="JOINT_LH_EXT" gear="1" ctrllimited="true" ctrlrange="-200 200"/>
         <general name="ACT_L_KNEE_EXT" joint="JOINT_LK_EXT" gear="1" ctrllimited="true" ctrlrange="-200 200"/>
-        <general name="ACT_L_ANK_INVER" joint="JOINT_LA_INV" gear="1" ctrllimited="true" ctrlrange="-70 70"/> -->
+        <general name="ACT_L_ANK_INVER" joint="JOINT_LA_INV" gear="1" ctrllimited="true" ctrlrange="-70 70"/>
         <general name="ACT_L_ANK_PLANTAR" joint="JOINT_LA_PLA" gear="1" ctrllimited="true" ctrlrange="-170 170"/>
 
     </actuator>

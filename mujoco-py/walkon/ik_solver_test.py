@@ -33,7 +33,7 @@ damping = 0.001
 end_effector_id = model.body('L_FOOT').id #"End-effector we wish to control.
 current_pose = data.body(end_effector_id).xpos #Current pose
 
-goal = [0.0, 0.0, 0.0] #Desire position
+goal = [0.1, 0.1, 0.0] #Desire position
 # goal = current_pose
 
 error = np.subtract(goal, current_pose) #Init Error
@@ -42,14 +42,6 @@ def check_joint_limits(q):
     """Check if the joints is under or above its limits"""
     for i in range(len(q)):
         q[i] = max(model.jnt_range[i][0], min(q[i], model.jnt_range[i][1]))
-
-def circle(t: float, r: float, h: float, k: float, f: float) -> np.ndarray:
-    """Return the (x, y) coordinates of a circle with radius r centered at (h, k)
-    as a function of time t and frequency f."""
-    x = r * np.cos(2 * np.pi * f * t) + h
-    y = r * np.sin(2 * np.pi * f * t) + k
-    z = 0.5
-    return np.array([x, y, z])
 
 #Simulate
 with mujoco.viewer.launch_passive(model, data) as viewer:

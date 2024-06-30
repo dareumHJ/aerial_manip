@@ -1,8 +1,9 @@
 import numpy as np
 import mujoco
-import mujoco.viewer
+import mujoco.viewer as viewer
 import mediapy as media
 
+# Choose a model
 xml = "WALKON5_left_leg.xml"
 model = mujoco.MjModel.from_xml_path(xml)
 data = mujoco.MjData(model)
@@ -13,96 +14,66 @@ DURATION = 4 #(seconds)
 FRAMERATE = 60 #(Hz)
 frames = []
 
-#Reset state and time.
-mujoco.mj_resetData(model, data)
-
-#Init position.
-# pi = np.pi
-# data.qpos = [3*pi/2, -pi/2, pi/2, 3*pi/2, 3*pi/2, 0] #ENABLE if you want test circle
-
-#Init parameters
 jacp = np.zeros((3, model.nv))
 jacr = np.zeros((3, model.nv))
 
-step_size = 0.5
+step_size = 0.1
 tol = 0.01
 alpha = 0.5
 damping = 0.001
 
 #Get error.
-end_effector_id = model.body('L_FOOT').id #"End-effector we wish to control.
+end_effector_id = model.body('L_ANKLE').id #"End-effector we wish to control.
+foot_id = model.body('L_FOOT').id
 current_pose = data.body(end_effector_id).xpos #Current pose
 
-goal = [0.0, 0.0, 0.0] #Desire position
-# goal = current_pose
+goal = [-0.2, -0.2, 0.3] #Desire position
 
 error = np.subtract(goal, current_pose) #Init Error
 
-def check_joint_limits(q):
-    """Check if the joints is under or above its limits"""
-    for i in range(len(q)):
-        q[i] = max(model.jnt_range[i][0], min(q[i], model.jnt_range[i][1]))
+mujoco.mj_resetData(model, data)
+qpos0 = data.qpos.copy()
+nv = model.nv
 
-def circle(t: float, r: float, h: float, k: float, f: float) -> np.ndarray:
-    """Return the (x, y) coordinates of a circle with radius r centered at (h, k)
-    as a function of time t and frequency f."""
-    x = r * np.cos(2 * np.pi * f * t) + h
-    y = r * np.sin(2 * np.pi * f * t) + k
-    z = 0.5
-    return np.array([x, y, z])
+mujoco.mj_forward(model, data)
+jac_com = np.zeros((3, nv))
+mujoco.mj_jacSubtreeCom(model, data, jac_com, end_effector_id)
 
-#Simulate
+jac_foot = np.zeros((3, nv))
+mujoco.mj_jacBodyCom(model, data, jac_foot, None, foot_id)
+
+jac_diff = jac_com - jac_foot
+Qbal = jac_diff.T @ jac_diff
+
+des_qpos = 0*np.pi/180
+err = (des_qpos - (data.qpos.copy())[12])
+
+Kp = 100.0
+Kd = 20.0
+
+prev_err = 0.0
+errdiff = (err - prev_err) / step_size
+
 with mujoco.viewer.launch_passive(model, data) as viewer:
     while data.time < DURATION:
-        
-        # goal = circle(data.time, 0.1, 0.5, 0.0, 0.5) #ENABLE to test circle.
-        if (np.linalg.norm(error) >= tol):
-            #Calculate jacobian
-            mujoco.mj_jac(model, data, jacp, jacr, goal, end_effector_id)
+        # mujoco.mj_differentiatePos(model, dq, 1, qpos0, data.qpos)
 
-            #Calculate delta of joint q
-            n = jacp.shape[1]
-            I = np.identity(n)
-            product = jacp.T @ jacp + damping * I
+        err = (des_qpos - (data.qpos.copy())[12])
+        errdiff = (err - prev_err) / step_size
 
-            if np.isclose(np.linalg.det(product), 0):
-                j_inv = np.linalg.pinv(product) @ jacp.T
-            else:
-                j_inv = np.linalg.inv(product) @ jacp.T
+        #Set control signal
+        ctrlval = Kp * err + Kd * errdiff
+        data.ctrl = [ctrlval]
+        #Step the simulation.
+        mujoco.mj_step(model, data)
 
-            delta_q = j_inv @ error
-            #Compute next step
+        prev_err = err
 
-            q = data.qpos.copy()
-            q += step_size * delta_q
-
-            #Check limits
-            check_joint_limits(data.qpos)
-            
-            #Set control signal
-            data.ctrl = q 
-            #Step the simulation.
-            mujoco.mj_step(model, data)
-
-            error = np.subtract(goal, data.body(end_effector_id).xpos)
-        #Render and save frames.
+        print(err)
         if len(frames) < data.time * FRAMERATE:
             renderer.update_scene(data)
             pixels = renderer.render()
             frames.append(pixels)
-
-        with viewer.lock():
-            viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = True
-            viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = True
-            viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = False
-
-            # tweak scales of contact visualization elements
-            model.vis.scale.contactwidth = 0.05
-            model.vis.scale.contactheight = 0.015
-            model.vis.scale.forcewidth = 0.025
-            model.vis.map.force = 0.15
-
         viewer.sync()
-        
-#Display video.
+
 media.show_video(frames, fps=FRAMERATE)
