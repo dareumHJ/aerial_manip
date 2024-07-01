@@ -34,14 +34,15 @@
         <light name="light" pos="0 5 5"/>
 
 
-        <body name="BASE" pos="0 0 1.2">
+        <!-- <body name="BASE" pos="0 0 1.2">
             <freejoint/>
             <geom type="mesh" mesh="BASE" pos="0 0 0"/>
-            <inertial mass="4.06288" pos="0.08148 0.14026 0.0055"/>
+            <inertial mass="4.06288" pos="0.08148 0.14026 0.0055"/> -->
             
-            <body name="L_BASE" pos="0 .105 0">
+            <body name="L_BASE" pos="0 .105 1.17">
                 <!-- <joint name="JOINT_LH_ABD" pos="0 0 0" axis="1 0 0" range="-10 15"/> -->
-                <joint name="JOINT_LH_ABD" pos="0 0 0" axis="1 0 0" range="0 0.01"/>
+                <!-- <joint name="JOINT_LH_ABD" pos="0 0 0" axis="1 0 0" range="0 0.01"/> -->
+                <freejoint/>
                 <geom type="mesh" mesh="L_BASE"/>
                 <inertial mass="4.90278" pos="0.02442 0.38146 -0.0482"/>
                 <body name="L_HIP" pos="-.2125 .155 -.04085">
@@ -74,12 +75,12 @@
                     </body>
                 </body>
             </body>
-        </body>
+        <!-- </body> -->
     </worldbody>
 
     <actuator>
         <!-- LEFT LIMB ACTUATORS -->
-        <general name="ACT_L_HIP_ABD" joint="JOINT_LH_ABD" gear="1" ctrllimited="true" ctrlrange="-250 250"/>
+        <!-- <general name="ACT_L_HIP_ABD" joint="JOINT_LH_ABD" gear="1" ctrllimited="true" ctrlrange="-250 250"/> -->
         <general name="ACT_L_HIP_ROT" joint="JOINT_LH_ROT" gear="1" ctrllimited="true" ctrlrange="-135 135"/>
         <general name="ACT_L_HIP_EXT" joint="JOINT_LH_EXT" gear="1" ctrllimited="true" ctrlrange="-200 200"/>
         <general name="ACT_L_KNEE_EXT" joint="JOINT_LK_EXT" gear="1" ctrllimited="true" ctrlrange="-200 200"/>
