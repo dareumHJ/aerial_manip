@@ -1,0 +1,143 @@
+<mujoco model="WalkON5">
+    <compiler inertiafromgeom="true" angle="degree"/>
+
+    <option timestep=".005" iterations="50" tolerance="1e-10" solver="Newton" jacobian="dense" cone="elliptic" impratio="100">
+        <flag contact="enable"/>
+    </option>
+
+    <size nconmax="50" njmax="500" nstack="10000"/>
+
+    <visual>
+        <map force="0.1" zfar="30"/>
+        <rgba haze="0.35 0.35 0.35 1"/>
+        <quality shadowsize="2048"/>
+        <global offwidth="1280" offheight="960"/>
+    </visual>
+
+    <default>
+        <joint limited="true" damping="0.0" armature="0.01" frictionloss="0.0"/>
+        <geom condim="1" material="matgeom" friction="0.6" margin="0.001"/>
+        <position kp="100" forcerange="-23.7 23.7"/>
+        <default class="visual">
+            <geom type="mesh" contype="0" conaffinity="0" group="2" material="dark"/>
+        </default>
+    </default>
+
+    <asset>
+        <material name="dark" rgba="0.1 0.1 0.1 1"/>
+        <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="512"/>
+        <texture name="texplane" type="2d" builtin="checker" rgb1=".2 .3 .4" rgb2=".1 0.15 0.2" width="512" height="512" mark="cross" markrgb=".8 .8 .8"/>
+        <texture name="texgeom" type="cube" builtin="flat" mark="cross" width="127" height="1278"
+            rgb1="0.8 0.8 0.8" rgb2="0.6 0.6 0.6" markrgb="1 1 1" random="0.01"/>
+        <material name="matplane" reflectance="0.3" texture="texplane" texrepeat="1 1" texuniform="true"/>
+        <material name="matgeom" texture="texgeom" texuniform="true" rgba="0.8 0.8 0.8 1"/>
+        <mesh name="BASE" file="../simbody_stls/BASE.STL"/>
+        <mesh name="L_BASE" file="../simbody_stls/L_BASE.STL"/>
+        <mesh name="L_HIP" file="../simbody_stls/L_HIP.STL"/>
+        <mesh name="L_THIGH" file="../simbody_stls/L_THIGH.STL"/>
+        <mesh name="L_SHANK" file="../simbody_stls/L_SHANK.STL"/>
+        <mesh name="L_ANKLE" file="../simbody_stls/L_ANKLE.STL"/>
+        <mesh name="L_FOOT" file="../simbody_stls/L_FOOT_bf.STL"/>
+        <mesh name="R_BASE" file="../simbody_stls/R_BASE.STL"/>
+        <mesh name="R_HIP" file="../simbody_stls/R_HIP.STL"/>
+        <mesh name="R_THIGH" file="../simbody_stls/R_THIGH.STL"/>
+        <mesh name="R_SHANK" file="../simbody_stls/R_SHANK.STL"/>
+        <mesh name="R_ANKLE" file="../simbody_stls/R_ANKLE.STL"/>
+        <mesh name="R_FOOT" file="../simbody_stls/R_FOOT_bf.STL"/>
+    </asset>
+
+    <worldbody>
+        <geom name="floor" pos="0 0 0" size="0 0 .25" type="plane" material="matplane" condim="3" friction="10 1 1" solref=".02 1" solimp=".9 .95 .001"/>
+        <light name="light" pos="0 5 5"/>
+
+        <body name="BASE" pos="0 0 1.2">
+            <freejoint/>
+            <geom type="mesh" mesh="BASE" pos="0 0 0"/>
+            <inertial mass="4.06288" pos="-0.02275 -0.01658 0.05494" fullinertia="0.07654504817 0.02024220049 0.06904783836 -0.00116752021 0.00004804708 0.00052111974"/>
+            
+            <!-- LEFT LIMB -->
+            <body name="L_BASE" pos="0 0 0">
+                <joint name="JOINT_LH_ABD" pos="0 .115 0" axis="1 0 0" range="-10 15"/>
+                <geom type="mesh" mesh="L_BASE"/>
+                <inertial mass="4.90278" pos="-0.07981 0.24120 0.00173" fullinertia="0.02121140274 0.04835300896 0.05130374593 -0.00991849754 0.01321543313 -0.00272525179"/>
+                <body name="L_HIP" pos="0 0 0">
+                    <joint name="JOINT_LH_ROT" pos="-.1875 .2705 .0" axis="0 0 1" range="-15 15" damping="5.65"/>
+                    <geom type="mesh" mesh="L_HIP"/>
+                    <inertial mass="4.36022" pos="-0.23011 0.27290 -0.15211" fullinertia="0.02481750877 0.03327195800 0.01078873999 -0.00006698203 -0.00658768434 -0.00021012633"/>
+                    <body name="L_THIGH" pos="0 0 0">
+                        <joint name="JOINT_LH_EXT" pos="-.1875 .2405 -.16915" axis="0 -1 0" range="-30 112" damping="3.25"/>
+                        <geom type="mesh" mesh="L_THIGH"/>
+                        <inertial mass="2.70534" pos="-0.23622 0.26194 -0.46966" fullinertia="0.05534355638 0.05728662078 0.00657494103 0.00003076713 -0.00158568371 0.00567343673"/>
+                        <body name="L_SHANK" pos="0 0 0">
+                            <joint name="JOINT_LK_EXT" pos="-.1875 .21426 -.59977" axis="0 1 0" range="0 120" damping="3"/>
+                            <geom type="mesh" mesh="L_SHANK"/>
+                            <inertial mass="2.49032" pos="-0.11729 0.15565 -0.73073" fullinertia="0.03393903802 0.03098446128 0.00742201881 -0.00247943357 -0.00384162992 0.00441951882"/>
+                            <body name="L_ANKLE" pos="0 0 0" euler="0 0 0">
+                                <joint name="JOINT_LA_INV" pos="-.06603 .10476 -.90801" axis="1 0 1" range="-15 10"/>
+                                <geom type="mesh" mesh="L_ANKLE"/>
+                                <inertial mass="0.55947" pos="-0.11980 0.13526 -0.95381" fullinertia="0.00291884244 0.00128487003 0.00290532896 0.00000005 0.00054856466 0.00000000"/>
+                                <body name="L_FOOT" pos="0 0 0" euler="0 0 0">
+                                    <joint name="JOINT_LA_PLA" pos="-.15552 .17526 -.9975" axis="0 -1 0" range="-30 20"/>
+                                    <geom type="mesh" mesh="L_FOOT" priority="1" solimp="0.015 1 0.023" condim="3" friction="0.8 0.02 0.01"/>
+                                    <inertial mass="7.55104" pos="-0.06324 0.13721 -0.97385" fullinertia="0.19865487853 0.21838580395 0.07110140611 -0.00052461653 0.01985821394 -0.00159785996"/>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+
+            <!-- RIGHT LIMB -->
+            <body name="R_BASE" pos="0 0 0">
+                <joint name="JOINT_RH_ABD" pos="0 -.115 0" axis="-1 0 0" range="-10 15"/>
+                <geom type="mesh" mesh="R_BASE"/>
+                <inertial mass="4.90278" pos="-0.07981 -0.24120 0.00173" fullinertia="0.02121140274 0.04835300896 0.05130374593 0.00991849754 0.01321543313 0.00272525179"/>
+                <body name="R_HIP" pos="0 0 0">
+                    <joint name="JOINT_RH_ROT" pos="-.1875 -.2705 .0" axis="0 0 -1" range="-15 15" damping="5.65"/>
+                    <geom type="mesh" mesh="R_HIP"/>
+                    <inertial mass="4.36022" pos="-0.23011 -0.27290 -0.15211" fullinertia="0.02481750877 0.03327195800 0.01078873999 0.00006698203 -0.00658768434 0.00021012633"/>
+                    <body name="R_THIGH" pos="0 0 0">
+                        <joint name="JOINT_RH_EXT" pos="-.1875 -.2405 -.16915" axis="0 -1 0" range="-30 112" damping="3.25"/>
+                        <geom type="mesh" mesh="R_THIGH"/>
+                        <inertial mass="2.70534" pos="-0.23622 -0.26194 -0.46966" fullinertia="0.05534355638 0.05728662078 0.00657494103 -0.00003076713 -0.00158568371 -0.00567343673"/>
+                        <body name="R_SHANK" pos="0 0 0">
+                            <joint name="JOINT_RK_EXT" pos="-.1875 -.21426 -.59977" axis="0 1 0" range="0 120" damping="3"/>
+                            <geom type="mesh" mesh="R_SHANK"/>
+                            <inertial mass="2.49032" pos="-0.11729 -0.15565 -0.73073" fullinertia="0.03393903802 0.03098446128 0.00742201881 0.00247943357 -0.00384162992 -0.00441951882"/>
+                            <body name="R_ANKLE" pos="0 0 0" euler="0 0 0">
+                                <joint name="JOINT_RA_INV" pos="-.06603 -.10476 -.90801" axis="1 0 1" range="-15 10"/>
+                                <geom type="mesh" mesh="R_ANKLE"/>
+                                <inertial mass="0.55947" pos="-0.11980 -0.13526 -0.95381" fullinertia="0.00291884244 0.00128487003 0.00290532896 -0.00000005 0.00054856466 0.00000000"/>
+                                <body name="R_FOOT" pos="0 0 0" euler="0 0 0">
+                                    <joint name="JOINT_RA_PLA" pos="-.15552 -.17526 -.9975" axis="0 -1 0" range="-30 20"/>
+                                    <geom type="mesh" mesh="R_FOOT" priority="1" solimp="0.015 1 0.023" condim="3" friction="0.8 0.02 0.01"/>
+                                    <inertial mass="7.55104" pos="-0.06324 -0.13721 -0.97385" fullinertia="0.19865487853 0.21838580395 0.07110140611 0.00052461653 0.01985821394 0.00159785996"/>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+        </body>
+
+    </worldbody>
+
+
+    <actuator>
+        <!-- LEFT LIMB ACTUATORS -->
+        <general name="ACT_L_HIP_ABD" joint="JOINT_LH_ABD" gear="1" ctrllimited="false"/>
+        <general name="ACT_L_HIP_ROT" joint="JOINT_LH_ROT" gear="1" ctrllimited="false"/>
+        <general name="ACT_L_HIP_EXT" joint="JOINT_LH_EXT" gear="1" ctrllimited="false"/>
+        <general name="ACT_L_KNEE_EXT" joint="JOINT_LK_EXT" gear="1" ctrllimited="false"/>
+        <general name="ACT_L_ANK_INVER" joint="JOINT_LA_INV" gear="1" ctrllimited="false"/>
+        <general name="ACT_L_ANK_PLANTAR" joint="JOINT_LA_PLA" gear="1" ctrllimited="false"/>
+
+        <!-- RIGHT LIMB ACTUATORS -->
+        <general name="ACT_R_HIP_ABD" joint="JOINT_RH_ABD" gear="1" ctrllimited="false"/>
+        <general name="ACT_R_HIP_ROT" joint="JOINT_RH_ROT" gear="1" ctrllimited="false"/>
+        <general name="ACT_R_HIP_EXT" joint="JOINT_RH_EXT" gear="1" ctrllimited="false"/>
+        <general name="ACT_R_KNEE_EXT" joint="JOINT_RK_EXT" gear="1" ctrllimited="false"/>
+        <general name="ACT_R_ANK_INVER" joint="JOINT_RA_INV" gear="1" ctrllimited="false"/>
+        <general name="ACT_R_ANK_PLANTAR" joint="JOINT_RA_PLA" gear="1" ctrllimited="false"/>
+    </actuator>
+</mujoco>

@@ -1,5 +1,5 @@
 <mujoco model="WalkON5">
-    <compiler inertiafromgeom="true" angle="degree"/>
+    <compiler inertiafromgeom="false" angle="degree" balanceinertia = "true"/>
     <default>
         <joint limited="true" damping="1" armature="0"/>
         <geom condim="1" material="matgeom"/>
@@ -22,12 +22,12 @@
         <material name="matplane" reflectance="0.3" texture="texplane" texrepeat="1 1" texuniform="true"/>
         <material name="matgeom" texture="texgeom" texuniform="true" rgba="0.8 0.8 0.8 1"/>
         <mesh name="BASE" file="../walkon_stls/BASE.STL"/>
-        <mesh name="L_BASE" file="../walkon_stls/L_BASE.STL"/>
-        <mesh name="L_HIP" file="../walkon_stls/L_HIP.STL"/>
-        <mesh name="L_THIGH" file="../walkon_stls/L_THIGH.STL"/>
-        <mesh name="L_SHANK" file="../walkon_stls/L_SHANK.STL"/>
-        <mesh name="L_ANKLE" file="../walkon_stls/L_ANKLE.STL"/>
-        <mesh name="L_FOOT" file="../walkon_stls/L_FOOT.STL"/>
+        <mesh name="L_BASE" file="../new_stls/L_BASE.STL"/>
+        <mesh name="L_HIP" file="../new_stls/L_HIP.STL"/>
+        <mesh name="L_THIGH" file="../new_stls/L_THIGH.STL"/>
+        <mesh name="L_SHANK" file="../new_stls/L_SHANK.STL"/>
+        <mesh name="L_ANKLE" file="../new_stls/L_ANKLE.STL"/>
+        <mesh name="L_FOOT" file="../new_stls/L_FOOT.STL"/>
     </asset>
     <worldbody>
         <geom name="floor" pos="0 0 0" size="0 0 .25" type="plane" material="matplane" condim="3"/>
@@ -39,36 +39,33 @@
             <geom type="mesh" mesh="BASE" pos="0 0 0"/>
             <inertial mass="4.06288" pos="0.08148 0.14026 0.0055"/> -->
             
-            <body name="L_BASE" pos="0 .105 1.17">
-                <!-- <joint name="JOINT_LH_ABD" pos="0 0 0" axis="1 0 0" range="-10 15"/> -->
-                <!-- <joint name="JOINT_LH_ABD" pos="0 0 0" axis="1 0 0" range="0 0.01"/> -->
+            <body name="L_BASE" pos="0 0 1.17">
                 <freejoint/>
+                <!-- <joint name="JOINT_LH_ABD" pos="0 .115 0" axis="1 0 0" range="-10 15"/> -->
                 <geom type="mesh" mesh="L_BASE"/>
-                <inertial mass="4.90278" pos="0.02442 0.38146 -0.0482"/>
-                <body name="L_HIP" pos="-.2125 .155 -.04085">
-                    <joint name="JOINT_LH_ROT" pos="0 0 0" axis="0 0 1" range="0 0.01" damping="5.65"/>
-                    <!-- <joint name="JOINT_LH_ROT" pos="0 0 0" axis="0 0 1" range="-15 15" damping="5.65"/> -->
+                <inertial mass="4.90278" pos="-0.07981 0.24120 0.00173" fullinertia="0.02121140274 0.04835300896 0.05130374593 -0.00991849754 0.01321543313 -0.00272525179"/>
+                <body name="L_HIP" pos="0 0 0">
+                    <joint name="JOINT_LH_ROT" pos="-.1875 .2705 .0" axis="0 0 1" range="0 0.01" damping="5.65"/>
                     <geom type="mesh" mesh="L_HIP"/>
-                    <inertial mass="4.36022" pos="-0.12588 0.41316 -0.20155"/>
-                    <body name="L_THIGH" pos="0 .00175 -.15415">
-                        <!-- <joint name="JOINT_LH_EXT" axis="0 1 0" range="-115 30" damping="3.25"/> -->
-                        <joint name="JOINT_LH_EXT" axis="0 1 0" range="0 0.01" damping="3.25"/>
+                    <inertial mass="4.36022" pos="-0.23011 0.27290 -0.15211" fullinertia="0.02481750877 0.03327195800 0.01078873999 -0.00006698203 -0.00658768434 -0.00021012633"/>
+                    <body name="L_THIGH" pos="0 0 0">
+                        <joint name="JOINT_LH_EXT" pos="-.1875 .2405 -.16915" axis="0 -1 0" range="0 0.01" damping="3.25"/>
                         <geom type="mesh" mesh="L_THIGH"/>
-                        <inertial mass="2.70534" pos="-0.13199 0.4022 -0.2723"/>
-                        <body name="L_SHANK" pos="-.009 -.025 -.43062">
-                            <!-- <joint name="JOINT_LK_EXT" axis="0 1 0" range="5 125" damping="3"/> -->
-                            <joint name="JOINT_LK_EXT" axis="0 1 0" range="0 0.01" damping="3"/>
+                        <inertial mass="2.70534" pos="-0.23622 0.26194 -0.46966" fullinertia="0.05534355638 0.05728662078 0.00657494103 0.00003076713 -0.00158568371 0.00567343673"/>
+                        <body name="L_SHANK" pos="0 0 0">
+                            <joint name="JOINT_LK_EXT" pos="-.1875 .21426 -.59977" axis="0 1 0" range="0 0.1" damping="3"/>
                             <geom type="mesh" mesh="L_SHANK"/>
-                            <inertial mass="2.49032" pos="-0.01306 0.29591 -0.01005"/>
-                            <body name="L_ANKLE" pos="0.04227 -0.11025 -0.38744" euler="0 -45 0">
-                                <!-- <joint name="JOINT_LA_INV" axis="1 0 0" range="-30 30"/> -->
-                                <joint name="JOINT_LA_INV" axis="1 0 0" range="0 0.01"/>
+                            <inertial mass="2.49032" pos="-0.11729 0.15565 -0.73073" fullinertia="0.03393903802 0.03098446128 0.00742201881 -0.00247943357 -0.00384162992 0.00441951882"/>
+                            <body name="L_ANKLE" pos="0 0 0" euler="0 0 0">
+                                <joint name="JOINT_LA_INV" pos="-.06603 .10476 -.90801" axis="1 0 1" range="-30 30"/>
+                                <!-- <joint name="JOINT_LA_INV" pos="-.06603 .10476 -.90801" axis="1 0 1" range="0 0.01"/> -->
                                 <geom type="mesh" mesh="L_ANKLE"/>
-                                <inertial mass="0.55947" pos="-0.01557 0.27552 -0.01969"/>
-                                <body name="L_FOOT" pos="0 0 0" euler="0 45 0">
-                                    <joint name="JOINT_LA_PLA" pos="0 0 0" axis="0 1 0" range="-30 115"/>
-                                    <geom type="mesh" mesh="L_FOOT"/>
-                                    <inertial mass="7.55104" pos="0.04099 0.27747 0.01767"/>
+                                <inertial mass="0.55947" pos="-0.11980 0.13526 -0.95381" fullinertia="0.00291884244 0.00128487003 0.00290532896 0.00000005 0.00054856466 0.00000000"/>
+                                <body name="L_FOOT" pos="0 0 0" euler="0 0 0">
+                                    <!-- <joint name="JOINT_LA_PLA" pos="-.15552 .17526 -.9975" axis="0 -1 0" range="-30 20"/> -->
+                                    <joint name="JOINT_LA_PLA" pos="-.15552 .17526 -.9975" axis="0 -1 0" range="0 0.01"/>
+                                    <geom type="mesh" mesh="L_FOOT" priority="1" solimp="0.015 1 0.023" condim="3" friction="0.8 0.02 0.01"/>
+                                    <inertial mass="7.55104" pos="-0.06324 0.13721 -0.97385" fullinertia="0.19865487853 0.21838580395 0.07110140611 -0.00052461653 0.01985821394 -0.00159785996"/>
                                 </body>
                             </body>
                         </body>

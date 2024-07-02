@@ -12,13 +12,10 @@ renderer = mujoco.Renderer(model)
 
 #Video Setup
 DURATION = 10 #(seconds)
-FRAMERATE = 60 #(Hz)
+FRAMERATE = 100 #(Hz)
 frames = []
 
-jacp = np.zeros((3, model.nv))
-jacr = np.zeros((3, model.nv))
-
-step_size = 0.1
+step_size = 0.005
 tol = 0.01
 alpha = 0.5
 damping = 0.001
@@ -26,70 +23,73 @@ damping = 0.001
 def compute_com(model, data):
     total_mass = np.sum(model.body_mass)
 
-    mass = model.body_mass
-    xpos = data.xipos
+    mass = (model.body_mass)
+    xpos = (data.xipos)
 
     com = np.sum(xpos.T * mass, axis=1) / total_mass
     return com
 
-#Get error.
-end_effector_id = model.body('L_ANKLE').id #"End-effector we wish to control.
-foot_id = model.body('L_FOOT').id
-current_pose = data.body(end_effector_id).xpos #Current pose
+
 
 mujoco.mj_resetData(model, data)
-qpos0 = data.qpos.copy()
-nv = model.nv
 
-mujoco.mj_forward(model, data)
-jac_com = np.zeros((3, nv))
-mujoco.mj_jacSubtreeCom(model, data, jac_com, end_effector_id)
+# 70 ~ 90
+des_qpos1 = 100*np.pi/180
+# des_qpos2 = 90*np.pi/180
 
-jac_foot = np.zeros((3, nv))
-mujoco.mj_jacBodyCom(model, data, jac_foot, None, foot_id)
-
-jac_diff = jac_com - jac_foot
-Qbal = jac_diff.T @ jac_diff
-
-des_qpos = 0*np.pi/180
+# des_qpos1 = 0*np.pi/180
+des_qpos2 = 0*np.pi/180
+des_qpos2 = 0*np.pi/180
 
 # find err value
-joint_pos = data.body(foot_id).xipos.copy()
+joint1_pos = data.body(model.body('L_FOOT').id).xipos.copy()
+joint2_pos = data.body(model.body('L_ANKLE').id).xipos.copy()
 com = compute_com(model, data)
-det_vec = com - joint_pos
-unit_vec = [0, 0, 1]
-err = des_qpos-math.acos(np.dot(det_vec, unit_vec) / det_vec.size)
+unit_vec1 = [0, -1, 0]
+unit_vec2 = [1, 0, 1]
+unit_vec2 = unit_vec2 / np.linalg.norm(unit_vec2)
 
-Ks = 200.0
-Bs = 200.0
+Ks = 300.0
+Bs = 50.0
+Ks2 = 1000.0
+Bs2 = 0.0
 
 # dq = np.zeros((1, 3))
-
-prev_err = 0.0
-errdiff = (err - prev_err) / step_size
 
 with mujoco.viewer.launch_passive(model, data) as viewer:
     while data.time < DURATION:
         # mujoco.mj_differentiatePos(model, dq, step_size, qpos0, data.qpos)
 
-        joint_pos = data.body(foot_id).xpos.copy()
+        joint1_pos = data.body(model.body('L_FOOT').id).xipos.copy()
+        joint2_pos = data.body(model.body('L_ANKLE').id).xipos.copy()
         com = compute_com(model, data)
-        det_vec = com - joint_pos
-        err = des_qpos - math.acos(np.dot(det_vec, unit_vec) / np.linalg.norm(det_vec))
+        det_vec1 = com - joint1_pos
+        det_vec2 = com - joint2_pos
+        err1 = des_qpos1 - math.acos(np.dot(det_vec1, unit_vec1) / np.linalg.norm(det_vec1))
+        # err1 = des_qpos1 - (data.qpos.copy())[11]
+        err2 = des_qpos2 - math.acos(np.dot(det_vec2, unit_vec2) / np.linalg.norm(det_vec2))
+        # err2 = des_qpos2 - (data.qpos.copy())[10]
         # err = (des_qpos - (data.qpos.copy())[12])
-        errdiff = 0.0 - (data.qvel)[10]
+        errdiff1 = 0.0 - (data.qvel.copy())[10]
+        errdiff2 = 0.0 - (data.qvel.copy())[9]
 
         #Set control signal
-        ctrlval = Ks * err + Bs * errdiff
-        # ctrlval = 20
-        data.ctrl = [0, 0, 0, 0, ctrlval]
+        ctrlval1 = (Ks * err1 + Bs * errdiff1)
+        ctrlval2 = (Ks2 * err2 + Bs2 * errdiff2)
+        ctrlval2 = 0
+        data.ctrl = [0, 0, 0, ctrlval2, ctrlval1]
+
+        if (data.time > 3):
+            data.xfrc_applied = [0, 0, 0, 0, 0, 0]
+        else:
+            data.xfrc_applied = [0, 0, 0, 0, 0, 0]
         #Step the simulation.
         mujoco.mj_step(model, data)
 
-        prev_err = err
-
-        # print("Center of Mass:", com)
-        print(ctrlval)
+        print("---------joint pos and com-----------")
+        print((data.qpos.copy())[10])
+        print(err2)
+        print(ctrlval2)
 
         if len(frames) < data.time * FRAMERATE:
             renderer.update_scene(data)
