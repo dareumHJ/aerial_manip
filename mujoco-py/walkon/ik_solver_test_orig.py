@@ -23,7 +23,6 @@ data.qpos = [3*pi/2, -pi/2, pi/2, 3*pi/2, 3*pi/2, 0] #ENABLE if you want test ci
 #Init parameters
 jacp = np.zeros((3, model.nv)) #translation jacobian
 jacr = np.zeros((3, model.nv)) #rotational jacobian
-print(model.nv)
 step_size = 0.5
 tol = 0.01
 alpha = 0.5

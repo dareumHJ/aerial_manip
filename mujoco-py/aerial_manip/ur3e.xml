@@ -1,0 +1,78 @@
+<mujoco model="ur3e">
+  <compiler inertiafromgeom="true" angle="degree"/>
+  <default>
+    <joint limited="true" damping="1" armature="0"/>
+    <geom condim="1" material="matgeom"/>
+  </default>
+  <option timestep=".005" iterations="50" tolerance="1e-16" solver="Newton" jacobian="dense" cone="pyramidal">
+    <flag contact="enable"/>
+  </option>
+
+  <!-- <default>
+    <default class="ur3e">
+      <material specular="0.5" shininess="0.25"/>
+      <joint axis="0 1 0" range="-6.28319 6.28319" armature="0.1"/>
+      <general gaintype="fixed" biastype="affine" ctrlrange="-6.2831 6.2831" gainprm="2000" biasprm="0 -2000 -400"
+        forcerange="-150 150"/>
+      <default class="size3">
+        <default class="size3_limited">
+          <joint range="-3.1415 3.1415"/>
+          <general ctrlrange="-3.1415 3.1415"/>
+        </default>
+      </default>
+      <default class="size1">
+        <general gainprm="500" biasprm="0 -500 -100" forcerange="-28 28"/>
+      </default>
+      <default class="visual">
+        <geom type="mesh" contype="0" conaffinity="0" group="2"/>
+      </default>
+      <default class="collision">
+        <geom type="capsule" group="3"/>
+        <default class="eef_collision">
+          <geom type="cylinder"/>
+        </default>
+      </default>
+      <site size="0.001" rgba="0.5 0.5 0.5 0.3" group="4"/>
+    </default>
+  </default> -->
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="512"/>
+    <texture name="texplane" type="2d" builtin="checker" rgb1=".2 .3 .4" rgb2=".1 0.15 0.2" width="512" height="512" mark="cross" markrgb=".8 .8 .8"/>
+    <texture name="texgeom" type="cube" builtin="flat" mark="cross" width="127" height="1278"
+        rgb1="0.8 0.8 0.8" rgb2="0.6 0.6 0.6" markrgb="1 1 1" random="0.01"/>
+    <material name="matplane" reflectance="0.3" texture="texplane" texrepeat="1 1" texuniform="true"/>
+    <material name="matgeom" texture="texgeom" texuniform="true" rgba="0.8 0.8 0.8 1"/>
+
+    <mesh name="BASE" file="stls/Base.STL"/>
+    <mesh name="LINK1" file="stls/Link1.STL"/>
+    <mesh name="LINK2" file="stls/Link2.STL"/>
+    <mesh name="LINK3" file="stls/Link3.STL"/>
+  </asset>
+
+  <worldbody>
+    <geom name="floor" pos="0 0 0" size="0 0 .25" type="plane" material="matplane" condim="3"/>
+    <!-- <light name="light" pos="0 5 5"/> -->
+    <light name="spotlight" mode="targetbodycom" target="base" pos="0 -1 2"/>
+    <body name="base" pos="0 0 0.1">
+      <inertial mass="1000000.0" pos="0 0 0"/>
+      <freejoint/>
+      <geom type="mesh" mesh="BASE"/>
+      <body name="link1" pos="0 0 .07" euler="0 0 0">
+        <joint name="shoulder_joint" pos=".0 .0 .054" axis="0 1 0" range="0 0.1"/>
+        <geom type="mesh" mesh="LINK1"/>
+        <!-- <body name="link2" pos="0 0 .06" euler="0 0 0">
+          <joint name="wrinkle_joint" pos=".0 .0 .06" axis="0 1 0" range="-30 30" damping="0"/>
+          <geom type="mesh" mesh="LINK2"/>
+        </body> -->
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <general name="act_shoulder" joint="shoulder_joint" gear="1" ctrllimited="true" ctrlrange="-20 20"/>
+    <!-- <general name="act_elbow" joint="elbow_joint" gear="1" ctrllimited="true" ctrlrange="-180 180"/> -->
+    <!-- <general name="act_wrinkle" joint="wrinkle_joint" gear="1" ctrllimited="true" ctrlrange="-180 180"/> -->
+  </actuator>
+
+</mujoco>
