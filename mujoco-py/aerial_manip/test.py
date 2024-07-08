@@ -81,7 +81,9 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         #     #Set control signal
         #     data.ctrl = q 
             #Step the simulation.
-        data.ctrl = [3]
+        q = [10, 5, -5]
+        check_joint_limits(data.qpos)
+        data.ctrl = q
         mujoco.mj_step(model, data)
 
             # error = np.subtract(goal, data.body(end_effector_id).xpos)

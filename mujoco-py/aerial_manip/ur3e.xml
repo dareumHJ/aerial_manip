@@ -1,5 +1,5 @@
 <mujoco model="ur3e">
-  <compiler inertiafromgeom="true" angle="degree"/>
+  <compiler inertiafromgeom="true" angle="degree" autolimits="true"/>
   <default>
     <joint limited="true" damping="1" armature="0"/>
     <geom condim="1" material="matgeom"/>
@@ -7,7 +7,7 @@
   <option timestep=".005" iterations="50" tolerance="1e-16" solver="Newton" jacobian="dense" cone="pyramidal">
     <flag contact="enable"/>
   </option>
-
+  <size nconmax="50" njmax="500" nstack="10000"/>
   <!-- <default>
     <default class="ur3e">
       <material specular="0.5" shininess="0.25"/>
@@ -55,24 +55,26 @@
     <!-- <light name="light" pos="0 5 5"/> -->
     <light name="spotlight" mode="targetbodycom" target="base" pos="0 -1 2"/>
     <body name="base" pos="0 0 0.1">
-      <inertial mass="1000000.0" pos="0 0 0"/>
-      <freejoint/>
       <geom type="mesh" mesh="BASE"/>
-      <body name="link1" pos="0 0 .07" euler="0 0 0">
-        <joint name="shoulder_joint" pos=".0 .0 .054" axis="0 1 0" range="0 0.1"/>
+      <body name="link1" pos="0 0 .06" euler="0 0 0">
+        <joint name="shoulder_joint" pos=".0 .0 .0" axis="0 0 1" range="-90 90"/>
         <geom type="mesh" mesh="LINK1"/>
-        <!-- <body name="link2" pos="0 0 .06" euler="0 0 0">
-          <joint name="wrinkle_joint" pos=".0 .0 .06" axis="0 1 0" range="-30 30" damping="0"/>
+        <body name="link2" pos="0 0 .09" euler="0 0 0">
+          <joint name="elbow_joint" pos=".0 .0 -.03" axis="1 0 0" range="-30 30"/>
           <geom type="mesh" mesh="LINK2"/>
-        </body> -->
+          <body name="link3" pos="0 0 .115" euler="0 0 0">
+            <joint name="wrinkle_joint" pos=".0 .0 -.03" axis="1 0 0" range="-30 30"/>
+            <geom type="mesh" mesh="LINK3"/>
+          </body>
+        </body>
       </body>
     </body>
   </worldbody>
 
   <actuator>
     <general name="act_shoulder" joint="shoulder_joint" gear="1" ctrllimited="true" ctrlrange="-20 20"/>
-    <!-- <general name="act_elbow" joint="elbow_joint" gear="1" ctrllimited="true" ctrlrange="-180 180"/> -->
-    <!-- <general name="act_wrinkle" joint="wrinkle_joint" gear="1" ctrllimited="true" ctrlrange="-180 180"/> -->
+    <general name="act_elbow" joint="elbow_joint" gear="1" ctrllimited="true" ctrlrange="-180 180"/>
+    <general name="act_wrinkle" joint="wrinkle_joint" gear="1" ctrllimited="true" ctrlrange="-180 180"/>
   </actuator>
 
 </mujoco>
