@@ -34,7 +34,7 @@ def compute_com(model, data):
 mujoco.mj_resetData(model, data)
 
 # 70 ~ 90
-des_qpos1 = 0*np.pi/180
+des_qpos1 = 90*np.pi/180
 des_qpos2 = 90*np.pi/180
 
 # des_qpos1 = 0*np.pi/180
@@ -44,17 +44,23 @@ des_qpos2 = 90*np.pi/180
 joint1_pos = data.body(model.body('L_FOOT').id).xipos.copy()
 joint2_pos = data.body(model.body('L_ANKLE').id).xipos.copy()
 com = compute_com(model, data)
-unit_vec1 = [0, -1, 0]
-unit_vec2 = [0, 0, 1]
+unit_vec1 = [1, 0, 0]
+unit_vec2 = [0, 1, 0]
 unit_vec2 = unit_vec2 / np.linalg.norm(unit_vec2)
 
 Ks = 30.0
-Bs = 3.0
+Bs = 1.0
+Ds = 0.07
 Ks2 = 30.0
-Bs2 = 3.0
+Bs2 = 1.0
+Ds2 = 0.07
+
 
 plant_idx = (data.qpos.size) - 1
 inver_idx = (data.qpos.size) - 2
+
+prev_qv1 = 0
+prev_qv2 = 0
 
 # dq = np.zeros((1, 3))
 
@@ -68,26 +74,30 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         det_vec1 = com - joint1_pos
         det_vec2 = com - joint2_pos
 
-        mat1 = (data.body(model.body('L_FOOT').id).xmat.copy()).reshape(3, 3)
-        print(mat1)
-        mat2 = (data.body(model.body('L_ANKLE').id).xmat.copy()).reshape(3, 3)
-        cur_pos1 = math.acos(np.dot((mat1 @ det_vec1), unit_vec1) / np.linalg.norm(det_vec1))
-        cur_pos2 = math.acos(np.dot((mat2 @ det_vec2), unit_vec2) / np.linalg.norm(det_vec2))
+        cur_pos1 = math.acos(np.dot(det_vec1, unit_vec1) / np.linalg.norm(det_vec1))
+        cur_pos2 = math.acos(np.dot(det_vec2, unit_vec2) / np.linalg.norm(det_vec2))
         err1 = -(des_qpos1 - cur_pos1)
         # err1 = des_qpos1 - (data.qpos.copy())[plant_idx]
         err2 = -(des_qpos2 - cur_pos2)
         # err2 = des_qpos2 - (data.qpos.copy())[inver_idx]
 
-        errdiff1 = 0.0 - (data.qvel.copy())[plant_idx - 1]
-        errdiff2 = 0.0 - (data.qvel.copy())[inver_idx - 1]
+        cur_qv1 = (data.qvel.copy())[plant_idx - 1]
+        cur_qv2 = (data.qvel.copy())[inver_idx - 1]
+
+        errdiff1 = 0.0 - cur_qv1
+        errdiff2 = 0.0 - cur_qv2
+
+        # 2nd derivative err
+        errdd1 = 0.0 - (cur_qv1 - prev_qv1) / step_size
+        errdd2 = 0.0 - (cur_qv2 - prev_qv2) / step_size
 
         #Set control signal
-        ctrlval1 = (Ks * err1 + Bs * errdiff1)
-        ctrlval2 = (Ks2 * err2 + Bs2 * errdiff2)
+        ctrlval1 = (Ks * err1 + Bs * errdiff1 + Ds * errdd1)
+        ctrlval2 = (Ks2 * err2 + Bs2 * errdiff2 + Ds2 * errdd2)
         data.ctrl = [ctrlval2, ctrlval1]
 
         if (data.time > 3 and data.time < 4):
-            data.xfrc_applied[1] = [20, 0, 0, 0, 0, 0]
+            data.xfrc_applied[1] = [-25, -25, 0, 0, 0, 0]
             
         else:
             data.xfrc_applied[1] = [0, 0, 0, 0, 0, 0]
@@ -95,14 +105,9 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         mujoco.mj_step(model, data)
 
         print("---------joint pos and com-----------")
-        # print(cur_pos1)
-        # print(des_qpos1)
-        # print(ctrlval1)
-        print((data.qpos.copy())[plant_idx])
+        print(err1)
         print("-------------------------------------")
-        print(cur_pos2)
-        print(des_qpos2)
-        print(ctrlval2)
+        print(err2)
 
         if len(frames) < data.time * FRAMERATE:
             renderer.update_scene(data)

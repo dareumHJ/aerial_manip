@@ -57,14 +57,14 @@
                             <geom type="mesh" mesh="L_SHANK"/>
                             <inertial mass="2.49032" pos="-0.11729 0.15565 -0.73073" fullinertia="0.03393903802 0.03098446128 0.00742201881 -0.00247943357 -0.00384162992 0.00441951882"/>
                             <body name="L_ANKLE" pos="0 0.05 0" euler="0 0 0">
-                                <joint name="JOINT_LA_INV" pos="-.06603 .10476 -.90801" axis="1 0 1" range="-170 170"/>
-                                <!-- <joint name="JOINT_LA_INV" pos="-.06603 .10476 -.90801" axis="1 0 1" range="0 0.01"/> -->
+                                <!-- <joint name="JOINT_LA_INV" pos="-.06603 .10476 -.90801" axis="1 0 1" range="-170 170"/> -->
+                                <joint name="JOINT_LA_INV" pos="-.06603 .10476 -.90801" axis="1 0 1" range="0 0.01"/>
                                 <geom type="mesh" mesh="L_ANKLE"/>
                                 <inertial mass="0.55947" pos="-0.11980 0.13526 -0.95381" fullinertia="0.00291884244 0.00128487003 0.00290532896 0.00000005 0.00054856466 0.00000000"/>
                                 <body name="L_FOOT" pos="0 0 0" euler="0 0 0">
                                     <joint name="JOINT_LA_PLA" pos="-.15552 .17526 -.9975" axis="0 -1 0" range="-170 170"/>
                                     <!-- <joint name="JOINT_LA_PLA" pos="-.15552 .17526 -.9975" axis="0 -1 0" range="0 0.01"/> -->
-                                    <geom type="mesh" mesh="L_FOOT" priority="1" solimp="0.015 1 0.023" condim="3" friction="0.8 0.02 0.01"/>
+                                    <geom type="mesh" mesh="L_FOOT" priority="1" solimp="0.015 1 0.023" condim="3" friction="0.9 0.9 0.01"/>
                                     <inertial mass="7.55104" pos="-0.06324 0.13721 -0.97385" fullinertia="0.19865487853 0.21838580395 0.07110140611 -0.00052461653 0.01985821394 -0.00159785996"/>
                                 </body>
                             </body>

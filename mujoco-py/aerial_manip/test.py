@@ -17,25 +17,24 @@ frames = []
 mujoco.mj_resetData(model, data)
 
 #Init position.
-# pi = np.pi
-# data.qpos = [3*pi/2, -pi/2, pi/2, 3*pi/2, 3*pi/2, 0] #ENABLE if you want test circle
+pi = np.pi
+data.qpos = [0, pi/2, -pi/2] #ENABLE if you want test circle
 
 #Init parameters
-# jacp = np.zeros((3, model.nv)) #translation jacobian
-# jacr = np.zeros((3, model.nv)) #rotational jacobian
-# print(model.nv)
-# step_size = 0.5
-# tol = 0.01
-# alpha = 0.5
-# damping = 0.001
+jacp = np.zeros((3, model.nv)) #translation jacobian
+jacr = np.zeros((3, model.nv)) #rotational jacobian
+step_size = 0.1
+tol = 0.01
+alpha = 0.5
+damping = 0.001
 
 #Get error.
-# end_effector_id = model.body('wrist_3_link').id #"End-effector we wish to control.
-# current_pose = data.body(end_effector_id).xpos #Current pose
+end_effector_id = model.body('E_E').id #"End-effector we wish to control.
+current_pose = data.body(end_effector_id).xpos #Current pose
 
-# goal = [0.49, 0.13, 0.59] #Desire position
+goal = [0, 0, 0.42] #Desire position
 
-# error = np.subtract(goal, current_pose) #Init Error
+error = np.subtract(goal, current_pose) #Init Error
 
 def check_joint_limits(q):
     """Check if the joints is under or above its limits"""
@@ -56,43 +55,53 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         
         # goal = circle(data.time, 0.1, 0.5, 0.0, 0.5) #ENABLE to test circle.
         
-        # if (np.linalg.norm(error) >= tol):
-        #     #Calculate jacobian
-        #     mujoco.mj_jac(model, data, jacp, jacr, goal, end_effector_id)
-        #     #Calculate delta of joint q
-        #     n = jacp.shape[1]
-        #     I = np.identity(n)
-        #     product = jacp.T @ jacp + damping * I
+        if (np.linalg.norm(error) >= tol):
+            #Calculate jacobian
+            mujoco.mj_jac(model, data, jacp, jacr, goal, end_effector_id)
+            #Calculate delta of joint q
+            n = jacp.shape[1]
+            I = np.identity(n)
+            product = jacp.T @ jacp + damping * I
 
-        #     if np.isclose(np.linalg.det(product), 0):
-        #         j_inv = np.linalg.pinv(product) @ jacp.T
-        #     else:
-        #         j_inv = np.linalg.inv(product) @ jacp.T
+            if np.isclose(np.linalg.det(product), 0):
+                j_inv = np.linalg.pinv(product) @ jacp.T
+            else:
+                j_inv = np.linalg.inv(product) @ jacp.T
 
-        #     delta_q = j_inv @ error
+            delta_q = j_inv @ error
 
-        #     #Compute next step
-        #     q = data.qpos.copy()
-        #     q += step_size * delta_q
+            #Compute next step
+            q = data.qpos.copy()
+            q += step_size * delta_q
             
-        #     #Check limits
-        #     check_joint_limits(data.qpos)
+            #Check limits
+            check_joint_limits(data.qpos)
             
-        #     #Set control signal
-        #     data.ctrl = q 
+            #Set control signal
+            data.ctrl = q 
             #Step the simulation.
-        q = [10, 5, -5]
-        check_joint_limits(data.qpos)
-        data.ctrl = q
-        mujoco.mj_step(model, data)
+            mujoco.mj_step(model, data)
 
-            # error = np.subtract(goal, data.body(end_effector_id).xpos)
+            error = np.subtract(goal, data.body(end_effector_id).xpos)
+
+            print(data.body(end_effector_id).xpos)
         
         #Render and save frames.
         if len(frames) < data.time * FRAMERATE:
             renderer.update_scene(data)
             pixels = renderer.render()
             frames.append(pixels)
+
+        with viewer.lock():
+            viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = True
+            viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = True
+            viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = False
+
+            # tweak scales of contact visualization elements
+            model.vis.scale.contactwidth = 0.05
+            model.vis.scale.contactheight = 0.015
+            model.vis.scale.forcewidth = 0.025
+            model.vis.map.force = 0.15
 
         viewer.sync()
         
