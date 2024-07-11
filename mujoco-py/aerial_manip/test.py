@@ -23,16 +23,16 @@ data.qpos = [0, pi/2, -pi/2] #ENABLE if you want test circle
 #Init parameters
 jacp = np.zeros((3, model.nv)) #translation jacobian
 jacr = np.zeros((3, model.nv)) #rotational jacobian
-step_size = 0.1
+step_size = 10
 tol = 0.01
 alpha = 0.5
-damping = 0.001
+damping = 0.01
 
 #Get error.
 end_effector_id = model.body('E_E').id #"End-effector we wish to control.
 current_pose = data.body(end_effector_id).xpos #Current pose
 
-goal = [0, 0, 0.42] #Desire position
+goal = [0.07, -0.05, 0.3] #Desire position
 
 error = np.subtract(goal, current_pose) #Init Error
 
@@ -42,19 +42,18 @@ def check_joint_limits(q):
         q[i] = max(model.jnt_range[i][0], min(q[i], model.jnt_range[i][1]))
 
 def circle(t: float, r: float, h: float, k: float, f: float) -> np.ndarray:
-    """Return the (x, y) coordinates of a circle with radius r centered at (h, k)
+    """Return the (x, z) coordinates of a circle with radius r centered at (h, k)
     as a function of time t and frequency f."""
     x = r * np.cos(2 * np.pi * f * t) + h
-    y = r * np.sin(2 * np.pi * f * t) + k
-    z = 0.5
+    y = 0.04
+    z = r * np.sin(2 * np.pi * f * t) + k
     return np.array([x, y, z])
 
 #Simulate
 with mujoco.viewer.launch_passive(model, data) as viewer:
     while data.time < DURATION:
         
-        # goal = circle(data.time, 0.1, 0.5, 0.0, 0.5) #ENABLE to test circle.
-        
+        goal = circle(data.time, 0.07, 0, 0.3, 3) #ENABLE to test circle.
         if (np.linalg.norm(error) >= tol):
             #Calculate jacobian
             mujoco.mj_jac(model, data, jacp, jacr, goal, end_effector_id)
@@ -75,17 +74,19 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
             q += step_size * delta_q
             
             #Check limits
-            check_joint_limits(data.qpos)
+            # check_joint_limits(data.qpos)
             
             #Set control signal
-            data.ctrl = q 
+            data.ctrl = q
+            
             #Step the simulation.
             mujoco.mj_step(model, data)
 
             error = np.subtract(goal, data.body(end_effector_id).xpos)
-
-            print(data.body(end_effector_id).xpos)
         
+        else:
+            mujoco.mj_step(model, data)
+
         #Render and save frames.
         if len(frames) < data.time * FRAMERATE:
             renderer.update_scene(data)

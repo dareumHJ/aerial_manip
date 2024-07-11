@@ -54,7 +54,7 @@
     <geom name="floor" pos="0 0 0" size="0 0 .25" type="plane" material="matplane" condim="3"/>
     <!-- <light name="light" pos="0 5 5"/> -->
     <light name="spotlight" mode="targetbodycom" target="base" pos="0 -1 2"/>
-    <body name="base" pos="0 0 0.1">
+    <body name="base" pos="0 0 0.001">
       <geom type="mesh" mesh="BASE"/>
       <body name="ACT1" pos="-.01125 0 .039" euler="0 0 90">
         <geom type="mesh" mesh="DYNM"/>
@@ -84,7 +84,7 @@
   </worldbody>
 
   <actuator>
-    <general name="act_shoulder" joint="shoulder_joint" gear="1" ctrllimited="true" ctrlrange="-20 20"/>
+    <general name="act_shoulder" joint="shoulder_joint" gear="1" ctrllimited="true" ctrlrange="-180 180"/>
     <general name="act_elbow" joint="elbow_joint" gear="1" ctrllimited="true" ctrlrange="-180 180"/>
     <general name="act_wrinkle" joint="wrinkle_joint" gear="1" ctrllimited="true" ctrlrange="-180 180"/>
   </actuator>

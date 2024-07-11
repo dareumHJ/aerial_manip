@@ -69,7 +69,6 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         det_vec2 = com - joint2_pos
 
         mat1 = (data.body(model.body('L_FOOT').id).xmat.copy()).reshape(3, 3)
-        print(mat1)
         mat2 = (data.body(model.body('L_ANKLE').id).xmat.copy()).reshape(3, 3)
         cur_pos1 = math.acos(np.dot((mat1 @ det_vec1), unit_vec1) / np.linalg.norm(det_vec1))
         cur_pos2 = math.acos(np.dot((mat2 @ det_vec2), unit_vec2) / np.linalg.norm(det_vec2))
