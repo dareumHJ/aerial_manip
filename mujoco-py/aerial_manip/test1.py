@@ -1,9 +1,11 @@
+# Do Inverse Kinematics once then Control...
+
 import numpy as np
 import mujoco_py
 import mujoco
 import mujoco.viewer
 import mediapy as media
-import matplot
+import matplotlib.pyplot as plt
 
 xml = "ur3e.xml"
 model = mujoco.MjModel.from_xml_path(xml)
@@ -80,6 +82,14 @@ q_goal = data.qpos.copy()
 mujoco.mj_resetData(model, data)
 data.qpos = [0, pi/2, -pi/2]
 
+# new jacobian
+_jacp = np.zeros((3, model.nv))
+_jacr = np.zeros((3, model.nv))
+
+# new initialize
+_error = 0
+_prev_error = 0
+
 #Simulate
 with mujoco.viewer.launch_passive(model, data) as viewer:
     while data.time < DURATION:
@@ -90,11 +100,16 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         error = np.subtract(q_goal, data.qpos)
         error_d = (error - prev_error)/dt
         
+        # new error
+        # _error = np.subtract(goal, data.body(end_effector_id).xpos)
+        # _error_d = (_error - _prev_error)/dt
         #Check limits
         # check_joint_limits(data.qpos)
         
         ctrlval = M @ (Kp * error + Kd * error_d)
-        ctrkvak = J
+
+        # mujoco.mj_jacBody(model, data, _jacp, _jacr, end_efFector_id)
+        # ctrlval = _jacp.T @ (-Kp * _error - Kd * _error_d)
         #Set control signal
         data.ctrl = cg + ctrlval
 
@@ -104,6 +119,7 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         mujoco.mj_step(model, data)
         #Update previous error
         prev_error = error
+        # _prev_error - _error
 
         #Render and save frames.
         if len(frames) < data.time * FRAMERATE:
