@@ -87,6 +87,7 @@ while (np.linalg.norm(error) > tol):
     data.qpos = q
     mujoco.mj_forward(model, data)
     error = goal2 - data.body(end_effector_id).xpos
+    
 print("ITERATION CHECK")
 print(data.body(end_effector_id).xpos)
 print(np.linalg.norm(error))
@@ -98,12 +99,12 @@ mujoco.mj_resetData(model, data)
 data.qpos = [0, pi/2, -pi/2]
 
 # new jacobian
-_jacp = np.zeros((3, model.nv))
-_jacr = np.zeros((3, model.nv))
+# _jacp = np.zeros((3, model.nv))
+# _jacr = np.zeros((3, model.nv))
 
 # new initialize
-_error = 0
-_prev_error = 0
+# _error = 0
+# _prev_error = 0
 
 a10, ak11, ak12, ak13 = get_coeff(qinit[0], q_goal[0], 0, 0, goal_t)
 a20, ak21, ak22, ak23 = get_coeff(qinit[1], q_goal[1], 0, 0, goal_t)
