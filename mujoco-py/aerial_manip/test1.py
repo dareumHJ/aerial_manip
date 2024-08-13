@@ -20,23 +20,20 @@ frames = []
 #Reset state and time.
 mujoco.mj_resetData(model, data)
 
-#Init position.
+# Init position.
 pi = np.pi
 data.qpos = [0, pi/2, -pi/2] #ENABLE if you want test circle
 
-#Init parameters
+# Init parameters
 M = np.zeros((model.nv, model.nv))
 jacp = np.zeros((3, model.nv)) #translation jacobian
 jacr = np.zeros((3, model.nv)) #rotational jacobian
 dt = 0.005
-gain = 20
 tol = 0.001
 damping = 0.0
 Kp = 100.0
 Kd = 10.0
 
-
-#Get error.
 end_effector_id = model.body('E_E').id
 current_pose = data.body(end_effector_id).xpos
 

@@ -133,10 +133,11 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
             q_goal[1] = cal_q_goal(a20, ak21, ak22, ak23, data.time + 1/goal_freq)
             q_goal[2] = cal_q_goal(a30, ak31, ak32, ak33, data.time + 1/goal_freq)
         
-        print(q_goal)
 
         error = np.subtract(q_goal, data.qpos)
         error_d = (error - prev_error)/dt
+
+        print(np.linalg.norm(error))
         
         # new error
         # _error = np.subtract(goal, data.body(end_effector_id).xpos)
