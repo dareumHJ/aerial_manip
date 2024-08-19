@@ -4,6 +4,7 @@ import numpy as np
 import mujoco
 import mujoco.viewer
 import mediapy as media
+import math
 import matplotlib.pyplot as plt
 
 xml = "mujoco_menagerie/skydio_x2/scene.xml"
@@ -34,21 +35,22 @@ tol = 0.001
 damping = 0.0
 Kp_f = 100.0
 Kd_f = 10.0
-Kp_M = 100.0
-Kd_M = 10.0
+Kp_M = 8.0
+Kd_M = 2.0
 
-d_body_pos = [0, 0, 1.2]
+d_body_pos = [0, 0, 0.5]
 d_body_vel = [0, 0, 0]
 
-d_body_rot = np.eye(3)
+d_body_rot = np.array([[1, 0, 0], [0, -1, 0], [0, 0, -1]])
+print(d_body_rot)
 d_body_avel = [0, 0, 0]
 
 e1 = np.array([1.0, 0, 0])
 e2 = np.array([0, 1.0, 0])
 e3 = np.array([0, 0, 1.0])
 
-tmat_d = 1
-tmat_ctf = 1
+tmat_d = 0.228035
+tmat_ctf = 0.0008
 thrust_M = np.array([[1, 1, 1, 1], [0, -tmat_d, 0, tmat_d], [tmat_d, 0, -tmat_d, 0], [-tmat_ctf, tmat_ctf, -tmat_ctf, tmat_ctf]])
 
 
@@ -135,34 +137,57 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         body_rot = np.linalg.inv(body_mat)
         body_avel = (data.body(model.body('x2').id).cvel.copy())[:3]
 
-        rot_err = vee_op(d_body_rot.T @ body_rot - body_rot.T @ d_body_rot)
+        rot_err = vee_op(d_body_rot.T @ body_rot - body_rot.T @ d_body_rot)/2
+        print(rot_err)
         avel_err = body_avel - body_rot.T @ d_body_rot @ d_body_avel
+        avel_err = np.zeros(3)
 
         # *********************************************************
 
         # *********************************************************
         # Control Inputs
-        J = M[3:, 3:]
+        J = np.diag(model.body_inertia[1])
+        # print(J)
         ctrl_f = np.dot(-(-Kp_f*pos_err - Kd_f*vel_err - m*g*e3), (body_rot @ e3))
+        ctrl_f = 0
+        # ctrl_f = np.dot(-(-m*g*e3), (body_rot @ e3))
+        # ctrl_M = np.cross(body_avel, J@body_avel) - J@(hat_op(body_avel)@body_rot.T@d_body_rot@d_body_avel)
+        # print(ctrl_M)
         ctrl_M = -Kp_M*rot_err - Kd_M*avel_err + np.cross(body_avel, J@body_avel) - J@(hat_op(body_avel)@body_rot.T@d_body_rot@d_body_avel)
-
-        print(ctrl_f)
-        print(ctrl_M)
+        # print(ctrl_M)
+        # ctrl_M = -Kp_M*rot_err - Kd_M*avel_err
+        # print(ctrl_M)
+        # ctrl_M = np.zeros(3)
         
         # *********************************************************
 
         # *********************************************************
         # Convert Control inputs to Thrust
-        thrust = np.linalg.inv(thrust_M) @ np.append(ctrl_f, ctrl_M)
-        print(np.append(ctrl_f, ctrl_M))
+        thrust = np.linalg.inv(thrust_M) @ np.append(-ctrl_f, ctrl_M)
 
         # *********************************************************
 
 
-        data.ctrl = np.array([1, 1, 1, 1]) * (m * g) / 4
+        # data.ctrl = np.zeros(4)
+        data.ctrl = thrust
+        # data.ctrl = np.array([1, 1, 1, 1]) * (m * g / 4)
 
         #Step the simulation.
         mujoco.mj_step(model, data)
+
+        # *********************************************************
+        # Print Error
+        # print("**** PRINT ERROR ****")
+        # print("POS error: ")
+        # print(pos_err)
+        # print("VEL error: ")
+        # print(vel_err)
+        # print("Attitude error: ")
+        # print(rot_err)
+        # print("Angular VEL error: ")
+        # print(avel_err)
+
+        # *********************************************************
 
 
 
