@@ -38,16 +38,16 @@ Kd_f = 10.0
 Kp_M = 8.0
 Kd_M = 2.0
 
-d_body_pos = [0, 0, 0.5]
-d_body_vel = [0, 0, 0]
-
-d_body_rot = np.array([[1, 0, 0], [0, -1, 0], [0, 0, -1]])
-print(d_body_rot)
-d_body_avel = [0, 0, 0]
-
 e1 = np.array([1.0, 0, 0])
 e2 = np.array([0, 1.0, 0])
 e3 = np.array([0, 0, 1.0])
+
+d_body_pos = [0, 0, 0.5]
+d_body_vel = [0, 0, 0]
+
+d_body_rot = np.array([[-1.0, 0, 0], [0, 1.0, 0], [0, 0, -1.0]])
+d_b1 = e1
+d_body_avel = [0, 0, 0]
 
 tmat_d = 0.228035
 tmat_ctf = 0.0008
@@ -103,6 +103,13 @@ def hat_op(vec):
     c = vec[2]
     mat = np.array([[0, -c, b], [c, 0, -a], [-b, a, 0]])
     return mat
+
+def cal_desired_rot(model, data, b1):
+    b3 = (data.body(model.body('x2').id).xmat.copy().reshape(3, 3))[:3]
+    print(data.body(model.body('x2').id).xmat.copy().reshape(3, 3))
+    b2 = np.cross(b3, b1) / np.linalg.norm(np.cross(b3, b1))
+    Rd = np.array([np.cross(b2, b3), b2, b3])
+    return Rd
 # reset
 mujoco.mj_resetData(model, data)
 
@@ -133,12 +140,19 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         # *********************************************************
 
         # *********************************************************
+        # Calculate desired orientation
+        # d_body_rot = cal_desired_rot(model, data, d_b1)
+        cal_desired_rot(model, data, d_b1)
+
+        # *********************************************************
+
+        # *********************************************************
         # Orientation Error
         body_rot = np.linalg.inv(body_mat)
         body_avel = (data.body(model.body('x2').id).cvel.copy())[:3]
 
         rot_err = vee_op(d_body_rot.T @ body_rot - body_rot.T @ d_body_rot)/2
-        print(rot_err)
+        print(d_body_rot.T @ body_rot - body_rot.T @ d_body_rot)
         avel_err = body_avel - body_rot.T @ d_body_rot @ d_body_avel
         avel_err = np.zeros(3)
 
@@ -149,7 +163,7 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
         J = np.diag(model.body_inertia[1])
         # print(J)
         ctrl_f = np.dot(-(-Kp_f*pos_err - Kd_f*vel_err - m*g*e3), (body_rot @ e3))
-        ctrl_f = 0
+        # ctrl_f = 0
         # ctrl_f = np.dot(-(-m*g*e3), (body_rot @ e3))
         # ctrl_M = np.cross(body_avel, J@body_avel) - J@(hat_op(body_avel)@body_rot.T@d_body_rot@d_body_avel)
         # print(ctrl_M)
